@@ -6,7 +6,7 @@
 # O.Salaün: script to generate a JSON file that represents the mailing lists tree
 # this JSON file is loaded by a Zimbra Sympa zimlet
 
-use lib split(/:/, $ENV{SYMPALIB} || ''), '/usr/local/sympa/bin';
+use lib split(/:/, $ENV{SYMPALIB} || '');
 
 use strict;
 use warnings;
@@ -171,29 +171,18 @@ print $json->pretty->encode( $perl_scalar ); # pretty-printing
 
 exit 0;
 
-# Moved to: Sympa::Aliases::Tempalte::_already_defined().
-#sub already_defined;
-
 __END__
 
 =encoding utf-8
 
 =head1 NAME
 
-alias_manager, alias_manager.pl - Manage Sympa aliases (Obsoleted)
-
-=head1 OBSOLETED
-
-F<alias_manager.pl> was obsoleted as of Sympa 6.2.24, and will be removed
-in the future.
-To manage aliases based on template, setting "C<alias_manager Template>" in
-F<sympa.conf> or F<robot.conf> is recommended.
+export_json.pl - generate a JSON file that represents the mailing lists tree
 
 =head1 SYNOPSIS
 
-S<C<alias_manager.pl> C<add> I<listname> I<domain> [ I<file> ]>
+S<C<export_json.pl> C<--robot> I<lists.my.fqdn>  I<file> C<--visibility_as_email> I>anybody@my.fqdn> > I</var/www/html/fqdn_lists.json>>
 
-S<C<alias_manager.pl> C<del> I<listname> I<domain> [ I<file> ]>
 
 =head1 DESCRIPTION
 
@@ -230,11 +219,8 @@ F<$SENDMAIL_ALIASES> sendmail aliases file.
 
 =head1 DOCUMENTATION
 
-The full documentation in HTML formats can be
-found in L<https://sympa-community.github.io/manual/>. 
-
-The mailing lists (with web archives) can be accessed at
-https://listes.renater.fr/sympa/lists/informatique/sympa.
+export_json.pl generates a JSON file that represents the mailing lists tree.
+This JSON file is loaded by a Zimbra Sympa zimlet.
 
 =head1 HISTORY
 
@@ -242,19 +228,9 @@ This program was originally written by:
 
 =over 4
 
-=item Serge Aumont
-
-ComitE<233> RE<233>seau des UniversitE<233>s
-
-=item Olivier SalaE<252>n
-
-ComitE<233> RE<233>seau des UniversitE<233>s
+=item Olivier Salaün
 
 =back
-
-This manual page was initially written by
-JE<233>rE<244>me Marant <jerome.marant@IDEALX.org>
-for the Debian GNU/Linux system.
 
 =head1 LICENSE
 
@@ -268,13 +244,5 @@ Invariant Sections, no Front-Cover Texts and no Back-Cover Texts.  A
 copy of the license can be found under
 L<http://www.gnu.org/licenses/fdl.html>.
 
-=head1 BUGS
-
-Report bugs to Sympa bug tracker.
-See L<http://www.sympa.org/tracking>.
-
-=head1 SEE ALSO
-
-L<Sympa::Aliases::Template>.
 
 =cut
