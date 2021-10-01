@@ -23,7 +23,7 @@ export SYMPALIB=/home/sympa/bin
 $SYMPALIB/export_json.pl --robot=lists.my.fqdn --visibility_as_email=anybody@my.fqdn > /var/www/html/fqdn_lists.json
 ```
 
-## Sympa mailing list settings
+## Sympa mailing list settings
 
 ### List topics
 
