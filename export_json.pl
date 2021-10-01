@@ -66,7 +66,10 @@ sub select_topics {
         );
         # We check if 'visibility_as_email' may view this topic
         # If not topic is excluded from generated JSON file
-        next unless (ref($result) eq 'HASH' && $result->{'action'} =~ /do_it/);
+        unless (ref($result) eq 'HASH' && $result->{'action'} =~ /do_it/) {
+            printf STDERR "INFO: topic $id_topic is not exported (due to authorization scenario result)\n";
+            next;
+        }
         my %topic_tree = ('type' => 'topic', 'description' => $topic->{'current_title'});
         
         if (defined $topic->{'sub'}) {
@@ -92,7 +95,7 @@ sub get_topic_node {
         
         return get_topic_node($subtree, $list_topics);
     }else {
-        printf "ERROR : manque topic %s/%s\n", $list_topics->[0];
+        printf STDERR "WARN: missing topic %s\n", $list_topics->[0];
         return undef;
     }
 }
@@ -139,7 +142,10 @@ foreach my $list (@{$all_lists || []}) {
         $action = $result->{'action'};
         $reason = $result->{'reason'};
     }
-    next unless ($action =~ /do_it/);
+    unless ($action =~ /do_it/) {
+        printf STDERR "INFO: list %s not exported (due to authorization scenario result)\n", $list->get_list_address();
+        next;
+    }
        
     my @topics = @{$list->{'admin'}{'topics'} || []};
     
