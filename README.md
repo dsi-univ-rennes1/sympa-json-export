@@ -15,6 +15,8 @@ The `export_json.pl` should be installed on your Sympa server. The script should
 
 `SYMPALIB` refers to the directory where Sympa libraries are installed.
 
+**Note**: the code requires Sympa **6.2.42 or higher** to be installed.
+
 Example:
 ```
 export SYMPALIB=/home/sympa/bin
