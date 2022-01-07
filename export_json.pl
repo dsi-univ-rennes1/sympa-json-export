@@ -66,7 +66,10 @@ sub select_topics {
         );
         # We check if 'visibility_as_email' may view this topic
         # If not topic is excluded from generated JSON file
-        next unless (ref($result) eq 'HASH' && $result->{'action'} =~ /do_it/);
+        unless (ref($result) eq 'HASH' && $result->{'action'} =~ /do_it/) {
+            printf STDERR "INFO: topic $id_topic is not exported (due to authorization scenario result)\n";
+            next;
+        }
         my %topic_tree = ('type' => 'topic', 'description' => $topic->{'current_title'});
         
         if (defined $topic->{'sub'}) {
@@ -92,7 +95,7 @@ sub get_topic_node {
         
         return get_topic_node($subtree, $list_topics);
     }else {
-        printf "ERROR : manque topic %s/%s\n", $list_topics->[0];
+        printf STDERR "WARN: missing topic %s\n", $list_topics->[0];
         return undef;
     }
 }
@@ -139,7 +142,10 @@ foreach my $list (@{$all_lists || []}) {
         $action = $result->{'action'};
         $reason = $result->{'reason'};
     }
-    next unless ($action =~ /do_it/);
+    unless ($action =~ /do_it/) {
+        printf STDERR "INFO: list %s not exported (due to authorization scenario result)\n", $list->get_list_address();
+        next;
+    }
        
     my @topics = @{$list->{'admin'}{'topics'} || []};
     
@@ -181,41 +187,18 @@ export_json.pl - generate a JSON file that represents the mailing lists tree
 
 =head1 SYNOPSIS
 
-S<C<export_json.pl> C<--robot> I<lists.my.fqdn>  I<file> C<--visibility_as_email> I>anybody@my.fqdn> > I</var/www/html/fqdn_lists.json>>
+export_json.pl --robot lists.my.fqdn  --visibility_as_email anybody@my.fqdn > /var/www/html/fqdn_lists.json
 
 
 =head1 DESCRIPTION
 
-Alias_manager is a program that helps in installing aliases for newly
-created lists and deleting aliases for closed lists. 
+Exporting a hierarchical representation of a mailing list service to be consumed by a Zimbra plugin (Zimlet). This zimlet helps end users select target mailing lists while writing an email.
 
-Alias management is performed only if it was setup in F</etc/sympa/sympa.conf>
-(C<sendmail_aliases> configuration parameter).
-
-Administrators using MTA functionalities to manage aliases (i.e.
-virtual_regexp and transport_regexp with postfix) can disable alias
-management by setting
-C<sendmail_aliases> configuration parameter to C<none>.
-
-=head1 OPTIONS
-
-=over 4
-
-=item C<add> I<listname> I<domain> [ I<file> ]
-
-Add the set of aliases for the mailing list I<listname> in the
-domain I<domain>.
-
-=item C<del> I<listname> I<domain> [ I<file> ]
-
-Remove the set of aliases for the mailing list I<listname> in the
-domain I<domain>.
+The export_json.pl script generates a JSON structure that may be published on a web server. The Zimbra server will frequently load this JSON file through an HTTP request.
+C<export_json.pl> configuration parameter to C<none>.
 
 =back
 
-=head1 FILES
-
-F<$SENDMAIL_ALIASES> sendmail aliases file.
 
 =head1 DOCUMENTATION
 
