@@ -15,13 +15,15 @@ The `export_json.pl` should be installed on your Sympa server. The script should
 
 `SYMPALIB` refers to the directory where Sympa libraries are installed.
 
+**Note**: the code requires Sympa **6.2.42 or higher** to be installed.
+
 Example:
 ```
 export SYMPALIB=/home/sympa/bin
 $SYMPALIB/export_json.pl --robot=lists.my.fqdn --visibility_as_email=anybody@my.fqdn > /var/www/html/fqdn_lists.json
 ```
 
-## Sympa mailing list settings
+## Sympa mailing list settings
 
 ### List topics
 
