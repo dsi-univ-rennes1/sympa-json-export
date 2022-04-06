@@ -25,10 +25,10 @@ use Data::Dumper;
 use JSON;
 
 my %options;
-GetOptions(\%main::options, 'help|h','robot=s','visibility_as_email=s');
+GetOptions(\%main::options, 'exclude_topics=s','exclude_lists=s','help|h','robot=s','visibility_as_email=s');
 
 if ($main::options{'help'}) {
-    pod2usage(0);
+    pod2usage(-verbose => 3);
 }
 
 ## Load Sympa.conf
@@ -55,9 +55,15 @@ sub select_topics {
     my $topics = shift;
     my $robot = shift;
     my $email_to_evaluate_visibility = shift;
+    
+    my $regex_exclude = $main::options{'exclude_topics'};
     my %topics_tree;
     
     while (my ($id_topic, $topic) = each %$topics) {
+        if ($regex_exclude && $id_topic =~ /$regex_exclude/) {
+            printf STDERR "INFO: topic $id_topic not exported (due to --exclude_topics option)\n";
+            next;
+        }
         my $result = Sympa::Scenario->new($robot, 'topics_visibility', name => $topic->{visibility})->authz(
                 'md5',
                 {   'topicname'   => $id_topic,
@@ -67,7 +73,7 @@ sub select_topics {
         # We check if 'visibility_as_email' may view this topic
         # If not topic is excluded from generated JSON file
         unless (ref($result) eq 'HASH' && $result->{'action'} =~ /do_it/) {
-            printf STDERR "INFO: topic $id_topic is not exported (due to authorization scenario result)\n";
+            printf STDERR "INFO: topic $id_topic not exported (due to authorization scenario result)\n";
             next;
         }
         my %topic_tree = ('type' => 'topic', 'description' => $topic->{'current_title'});
@@ -126,7 +132,14 @@ $list_tree{'children'} = select_topics(\%topics,
 
 # Go through all lists
 my $all_lists     = Sympa::List::get_lists($main::options{'robot'});
+my $regex_exclude = $main::options{'exclude_lists'};
 foreach my $list (@{$all_lists || []}) {
+    
+    if ($regex_exclude && $list->get_list_address() =~ /$regex_exclude/) {
+            printf STDERR "INFO: list % not exported (due to --exclude_lists option)\n";
+            next;
+    }
+    
     next unless $list->{'admin'}{'status'} eq 'open';
     
     # We check if 'visibility_as_email' may view this list
@@ -189,6 +202,32 @@ export_json.pl - generate a JSON file that represents the mailing lists tree
 
 export_json.pl --robot lists.my.fqdn  --visibility_as_email anybody@my.fqdn > /var/www/html/fqdn_lists.json
 
+export_json.pl --robot lists.my.fqdn  --visibility_as_email anybody@my.fqdn --exclude_topics='ex_inscrits' --exclude_lists='^\d+.*\@' > /var/www/html/fqdn_lists.json
+
+=head1 OPTIONS
+
+F<export_json.pl> may run with following options:
+
+=over 4
+
+=item C<--robot=>I<domain>
+
+Select Sympa robot I<domain> to load lists from.
+
+=item C<--visibility_as_email=>I<anybody@my.fqdn>
+
+The I<anybody@my.fqdn> argument value is an email address, used to evaluate `visibility` authorization scenarios. Lists are filtered based on this parameter.
+
+=item C<--exclude_topics=>I<topics_regex>
+
+I<topics_regex> is a perl regular expression applied on topic ids to exclude topics from the processing.
+
+=item C<--exclude_lists=>I<topics_regex>
+
+I<topics_lists> is a perl regular expression applied on list address to exclude lists from the processing.
+
+
+=back
 
 =head1 DESCRIPTION
 
@@ -196,8 +235,6 @@ Exporting a hierarchical representation of a mailing list service to be consumed
 
 The export_json.pl script generates a JSON structure that may be published on a web server. The Zimbra server will frequently load this JSON file through an HTTP request.
 C<export_json.pl> configuration parameter to C<none>.
-
-=back
 
 
 =head1 DOCUMENTATION
