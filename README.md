@@ -125,3 +125,14 @@ Here is a simple example:
 Since our JSON file is generated once and later used (by Zimbra server) for different end-users, we could not afford processing Sympa authorization rules to exclude private mailing lists.
 
 The `export_json.pl` script provides a `--visibility_as_email` argument. The argument value is an email address, used to evaluate `visibility` authorization scenarios.
+
+
+### Excluding mailing lists or topics
+
+You can filter lists or topics, based on regular expressions using the `--exclude_topics` and `--exclude_lists` command-line arguments.
+
+### Merging JSON files
+
+You might want to export a merged version of the JSON files, to publish mailing lists from multiple vhosts. Here is the JQ command to run to merge JSON files under a common root element:
+```jq -s ' {type: "root", description: "Université de Rennes 1", children: .} | (.children[].type="topic") | (.children[].description |= sub("Université de Rennes 1 - ";""))|.' test_pers.json test_etu.json > test_all.json
+```
