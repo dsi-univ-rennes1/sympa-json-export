@@ -21,6 +21,7 @@ Example:
 ```
 export SYMPALIB=/home/sympa/bin
 $SYMPALIB/export_json.pl --robot=lists.my.fqdn --visibility_as_email=anybody@my.fqdn > /var/www/html/fqdn_lists.json
+$SYMPALIB/export_json.pl --robot lists.my.fqdn  --visibility_as_email anybody@my.fqdn --exclude_topics='ex_inscrits' --exclude_lists='^\d+.*\@' > /var/www/html/fqdn_lists.json
 ```
 
 ## Sympa mailing list settings
