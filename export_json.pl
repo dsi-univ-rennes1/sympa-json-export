@@ -25,7 +25,7 @@ use Data::Dumper;
 use JSON;
 
 my %options;
-GetOptions(\%main::options, 'exclude_topics=s','exclude_lists=s','help|h','robot=s','visibility_as_email=s');
+GetOptions(\%main::options, 'add_listname_to_description', 'exclude_topics=s','exclude_lists=s','help|h','robot=s','visibility_as_email=s');
 
 if ($main::options{'help'}) {
     pod2usage(-verbose => 3);
@@ -101,12 +101,13 @@ sub get_topic_node {
         
         return get_topic_node($subtree, $list_topics);
     }else {
-        printf STDERR "WARN: missing topic %s\n", $list_topics->[0];
+        #printf STDERR "WARN: missing topic %s\n", $list_topics->[0];
         return undef;
     }
 }
 
 # Reorganize %list_tree to turn 'children' nodes into arrayrefs
+# and remove empty topics nodes with no list
 sub reorganize_tree {
     my $tree = shift;
     my $level = shift || 1;
@@ -114,9 +115,15 @@ sub reorganize_tree {
     if (defined $tree->{'children'}) {
         my $reorg_children = [];
         while (my ($key, $child) = each %{$tree->{'children'}}) {
-            push @{$reorg_children}, reorganize_tree($child, $level+1);
+            my $reorg_child = reorganize_tree($child, $level+1);
+            push @{$reorg_children}, $reorg_child if (defined $reorg_child);
         }
-        $tree->{'children'} = $reorg_children;
+        $tree->{'children'} = $reorg_children if (defined $tree->{'children'});
+    
+    # Ignore topics node with no children
+    }elsif ($tree->{'type'} eq 'topic') {
+        printf STDERR "INFO: skip empty topic %s\n", $tree->{'description'};
+        return undef;
     }
     return $tree;        
 }
@@ -167,6 +174,11 @@ foreach my $list (@{$all_lists || []}) {
     #printf "%s : visibility=%s ; topics=%s\n",$list->{'name'}, $list->{'admin'}{'visibility'}{'name'}, join(',', @topics);
        
     my %list_node = ('type' => 'list', 'email' => $list->get_list_address(), 'description' => $list->{'admin'}{'subject'}." (".$list->get_total()." membres)");
+    
+    if ($main::options{'add_listname_to_description'}) {
+        $list_node{'description'} = $list->{'name'} . ' : ' . $list_node{'description'};
+    }
+    
     foreach my $topic (@topics) {
         my @list_topics = split '/', $topic;
         my $node = get_topic_node(\%list_tree, \@list_topics);
@@ -226,6 +238,9 @@ I<topics_regex> is a perl regular expression applied on topic ids to exclude top
 
 I<topics_lists> is a perl regular expression applied on list address to exclude lists from the processing.
 
+=item C<--add_listname_to_description>
+
+Enable this option to add listname as prefix to JSON list description nodes.
 
 =back
 

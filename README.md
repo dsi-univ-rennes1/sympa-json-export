@@ -19,9 +19,10 @@ The `export_json.pl` should be installed on your Sympa server. The script should
 
 Example:
 ```
-export SYMPALIB=/home/sympa/bin
-$SYMPALIB/export_json.pl --robot=lists.my.fqdn --visibility_as_email=anybody@my.fqdn > /var/www/html/fqdn_lists.json
-$SYMPALIB/export_json.pl --robot lists.my.fqdn  --visibility_as_email anybody@my.fqdn --exclude_topics='ex_inscrits' --exclude_lists='^\d+.*\@' > /var/www/html/fqdn_lists.json
+export SYMPALIB=/usr/local/sympa/bin
+$ ./export_json.pl --robot=listes.etudiant.univ-rennes1.fr --visibility_as_email=anybody@univ-rennes1.fr --exclude_topics='ex_inscrits' --add_listname_to_description  | tee 20220408_ur1_listes_etu.json
+$ ./export_json.pl --robot=listes.univ-rennes1.fr --visibility_as_email=anybody@univ-rennes1.fr --exclude_topics='ex_inscrits' --add_listname_to_description  | tee 20220408_ur1_listes_pers.json
+$ jq -s ' {type: "root", description: "Université de Rennes 1", children: .} | (.children[].type="topic") | (.children[].description |= sub("Université de Rennes 1 - ";""))|.' 20220408_ur1_listes_etu.json 20220408_ur1_listes_pers.json > 20220408_ur1_listes_all.json
 ```
 
 ## Sympa mailing list settings
