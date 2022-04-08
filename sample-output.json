@@ -12,17 +12,17 @@
           "children": [
             {
               "type": "list",
-              "email": "med-doctorat-2122@listes.etudiant.univ-rennes1.fr",
+              "email": "xx-doctorat-2122@listes.etudiant.univ-rennes1.fr",
               "description": "Faculté de médecine : tous les étudiants inscrits en Doctorat (inscrits 2021-2022) (19 membres)"
             },
             {
               "type": "list",
-              "email": "med-m10103-2122@listes.etudiant.univ-rennes1.fr",
+              "email": "xx-m10103-2122@listes.etudiant.univ-rennes1.fr",
               "description": "CERTIFICAT DE CAPACITE D'ORTHOPTISTE ANNEE2 (inscrits 2021-2022) (20 membres)"
             },
             {
               "type": "list",
-              "email": "med-m10104-2122@listes.etudiant.univ-rennes1.fr",
+              "email": "xx-m10104-2122@listes.etudiant.univ-rennes1.fr",
               "description": "CERTIFICAT DE CAPACITE D'ORTHOPTISTE ANNEE3 (inscrits 2021-2022) (18 membres)"
             }
           ]
