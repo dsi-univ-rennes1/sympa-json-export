@@ -25,7 +25,7 @@ use Data::Dumper;
 use JSON;
 
 my %options;
-GetOptions(\%main::options, 'add_listname_to_description', 'exclude_topics=s','exclude_lists=s','help|h','robot=s','visibility_as_email=s');
+GetOptions(\%main::options, 'add_listname_to_description', 'exclude_topics=s','exclude_lists=s','help|h','robot=s','verbose','visibility_as_email=s');
 
 if ($main::options{'help'}) {
     pod2usage(-verbose => 3);
@@ -61,7 +61,7 @@ sub select_topics {
     
     while (my ($id_topic, $topic) = each %$topics) {
         if ($regex_exclude && $id_topic =~ /$regex_exclude/) {
-            printf STDERR "INFO: topic $id_topic not exported (due to --exclude_topics option)\n";
+            printf STDERR "INFO: topic $id_topic not exported (due to --exclude_topics option)\n" if ($main::options{'verbose'});
             next;
         }
         my $result = Sympa::Scenario->new($robot, 'topics_visibility', name => $topic->{visibility})->authz(
@@ -73,7 +73,7 @@ sub select_topics {
         # We check if 'visibility_as_email' may view this topic
         # If not topic is excluded from generated JSON file
         unless (ref($result) eq 'HASH' && $result->{'action'} =~ /do_it/) {
-            printf STDERR "INFO: topic $id_topic not exported (due to authorization scenario result)\n";
+            printf STDERR "INFO: topic $id_topic not exported (due to authorization scenario result)\n" if ($main::options{'verbose'});
             next;
         }
         my %topic_tree = ('type' => 'topic', 'description' => $topic->{'current_title'});
@@ -101,7 +101,6 @@ sub get_topic_node {
         
         return get_topic_node($subtree, $list_topics);
     }else {
-        #printf STDERR "WARN: missing topic %s\n", $list_topics->[0];
         return undef;
     }
 }
@@ -122,7 +121,7 @@ sub reorganize_tree {
     
     # Ignore topics node with no children
     }elsif ($tree->{'type'} eq 'topic') {
-        printf STDERR "INFO: skip empty topic %s\n", $tree->{'description'};
+        printf STDERR "INFO: skip empty topic %s\n", $tree->{'description'} if ($main::options{'verbose'});
         return undef;
     }
     return $tree;        
@@ -134,16 +133,13 @@ $list_tree{'children'} = select_topics(\%topics,
                                         $main::options{'robot'},
                                         $main::options{'visibility_as_email'});
 
-# Load topics.conf
-#print Data::Dumper::Dumper(\%topics);
-
 # Go through all lists
 my $all_lists     = Sympa::List::get_lists($main::options{'robot'});
 my $regex_exclude = $main::options{'exclude_lists'};
 foreach my $list (@{$all_lists || []}) {
     
     if ($regex_exclude && $list->get_list_address() =~ /$regex_exclude/) {
-            printf STDERR "INFO: list % not exported (due to --exclude_lists option)\n";
+            printf STDERR "INFO: list % not exported (due to --exclude_lists option)\n" if ($main::options{'verbose'});
             next;
     }
     
@@ -163,16 +159,14 @@ foreach my $list (@{$all_lists || []}) {
         $reason = $result->{'reason'};
     }
     unless ($action =~ /do_it/) {
-        printf STDERR "INFO: list %s not exported (due to authorization scenario result)\n", $list->get_list_address();
+        printf STDERR "INFO: list %s not exported (due to authorization scenario result)\n", $list->get_list_address() if ($main::options{'verbose'});
         next;
     }
        
     my @topics = @{$list->{'admin'}{'topics'} || []};
     
     next if ($#topics < 0);
-
-    #printf "%s : visibility=%s ; topics=%s\n",$list->{'name'}, $list->{'admin'}{'visibility'}{'name'}, join(',', @topics);
-       
+      
     my %list_node = ('type' => 'list', 'email' => $list->get_list_address(), 'description' => $list->{'admin'}{'subject'}." (".$list->get_total()." membres)");
     
     if ($main::options{'add_listname_to_description'}) {
@@ -188,8 +182,6 @@ foreach my $list (@{$all_lists || []}) {
         }
     }
 }
-
-#print Data::Dumper::Dumper(\%list_tree);
 
 my $new_list_tree = reorganize_tree(\%list_tree);
 
@@ -241,6 +233,10 @@ I<topics_lists> is a perl regular expression applied on list address to exclude 
 =item C<--add_listname_to_description>
 
 Enable this option to add listname as prefix to JSON list description nodes.
+
+=item C<--verbose>
+
+Add verbosity
 
 =back
 

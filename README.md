@@ -20,9 +20,10 @@ The `export_json.pl` should be installed on your Sympa server. The script should
 Example:
 ```
 export SYMPALIB=/usr/local/sympa/bin
-$ ./export_json.pl --robot=listes.etudiant.univ-rennes1.fr --visibility_as_email=anybody@univ-rennes1.fr --exclude_topics='ex_inscrits' --add_listname_to_description  | tee 20220408_ur1_listes_etu.json
-$ ./export_json.pl --robot=listes.univ-rennes1.fr --visibility_as_email=anybody@univ-rennes1.fr --exclude_topics='ex_inscrits' --add_listname_to_description  | tee 20220408_ur1_listes_pers.json
-$ jq -s ' {type: "root", description: "Université de Rennes 1", children: .} | (.children[].type="topic") | (.children[].description |= sub("Université de Rennes 1 - ";""))|.' 20220408_ur1_listes_etu.json 20220408_ur1_listes_pers.json > 20220408_ur1_listes_all.json
+$ ./export_json.pl --robot=listes.etudiant.univ-rennes1.fr --visibility_as_email=anybody@univ-rennes1.fr --exclude_topics='ex_inscrits' --add_listname_to_description  | tee ur1_listes_etu.json
+$ ./export_json.pl --robot=listes.univ-rennes1.fr --visibility_as_email=anybody@univ-rennes1.fr --exclude_topics='ex_inscrits' --add_listname_to_description  | tee ur1_listes_pers.json
+$ jq -s ' {type: "root", description: "Université de Rennes 1", children: .} | (.children[].type="topic") | (.children[].description |= sub("Université de Rennes 1 - ";""))|.' ur1_listes_etu.json ur1_listes_pers.json > ur1_listes_all.json
+cd libPythonBssApi ; ./cli-bss.py --bssUrl=https://ppd-api.partage.renater.fr/service/domain --domain=univ-rennes1.fr --domainKey=SECRET --createDefinition --jsonData=/usr/local/sympa/zimlet_partage/ur1_listes_all.json
 ```
 
 ## Sympa mailing list settings
@@ -137,4 +138,15 @@ You can filter lists or topics, based on regular expressions using the `--exclud
 You might want to export a merged version of the JSON files, to publish mailing lists from multiple vhosts. Here is the JQ command to run to merge JSON files under a common root element:
 ```
 jq -s ' {type: "root", description: "Université de Rennes 1", children: .} | (.children[].type="topic") | (.children[].description |= sub("Université de Rennes 1 - ";""))|.' test_pers.json test_etu.json > test_all.json
+```
+
+## Pushing JSON updates to Partage severs
+
+The BSS API provides new methods to update a domain's mailing lists JSON file.
+
+You need first to install [the Python library for the Partage BSS API](https://github.com/dsi-univ-rennes1/libPythonBssApi).
+
+Then run the `CreateDefinition` method with the JSON file as argument:
+```
+cd libPythonBssApi ; ./cli-bss.py --bssUrl=https://ppd-api.partage.renater.fr/service/domain --domain=univ-rennes1.fr --domainKey=SECRET --createDefinition --jsonData=/ur1_listes_all.json
 ```
