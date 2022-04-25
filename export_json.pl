@@ -117,8 +117,10 @@ sub reorganize_tree {
             my $reorg_child = reorganize_tree($child, $level+1);
             push @{$reorg_children}, $reorg_child if (defined $reorg_child);
         }
-        $tree->{'children'} = $reorg_children if (defined $tree->{'children'});
-    
+        if (defined $tree->{'children'}) {
+            $tree->{'children'} = [ sort {$a->{'description'} cmp $b->{'description'}} @$reorg_children ] ;
+        }
+            
     # Ignore topics node with no children
     }elsif ($tree->{'type'} eq 'topic') {
         printf STDERR "INFO: skip empty topic %s\n", $tree->{'description'} if ($main::options{'verbose'});
