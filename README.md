@@ -20,10 +20,10 @@ The `export_json.pl` should be installed on your Sympa server. The script should
 Example:
 ```
 export SYMPALIB=/usr/local/sympa/bin
-$ ./export_json.pl --robot=listes.etudiant.univ-rennes1.fr --visibility_as_email=anybody@univ-rennes1.fr --exclude_topics='ex_inscrits' --add_listname_to_description  | tee ur1_listes_etu.json
-$ ./export_json.pl --robot=listes.univ-rennes1.fr --visibility_as_email=anybody@univ-rennes1.fr --exclude_topics='ex_inscrits' --add_listname_to_description  | tee ur1_listes_pers.json
-$ jq -s ' {type: "root", description: "Université de Rennes 1", children: .} | (.children[].type="topic") | (.children[].description |= sub("Université de Rennes 1 - ";""))|.' ur1_listes_etu.json ur1_listes_pers.json > ur1_listes_all.json
-cd libPythonBssApi ; ./cli-bss.py --bssUrl=https://ppd-api.partage.renater.fr/service/domain --domain=univ-rennes1.fr --domainKey=SECRET --createDefinition --jsonData=/usr/local/sympa/zimlet_partage/ur1_listes_all.json
+$ ./export_json.pl --robot=listes.etudiant.univ-rennes.fr --visibility_as_email=anybody@univ-rennes.fr --exclude_topics='ex_inscrits' --add_listname_to_description  | tee ur1_listes_etu.json
+$ ./export_json.pl --robot=listes.univ-rennes.fr --visibility_as_email=anybody@univ-rennes.fr --exclude_topics='ex_inscrits' --add_listname_to_description  | tee ur1_listes_pers.json
+$ jq -s ' {type: "root", description: "Université de Rennes", children: .} | (.children[].type="topic") | (.children[].description |= sub("Université de Rennes - ";""))|.' ur1_listes_etu.json ur1_listes_pers.json > ur1_listes_all.json
+cd libPythonBssApi ; ./cli-bss.py --bssUrl=https://ppd-api.partage.renater.fr/service/domain --domain=univ-rennes.fr --domainKey=SECRET --createDefinition --jsonData=/usr/local/sympa/zimlet_partage/ur1_listes_all.json
 ```
 
 ## Sympa mailing list settings
@@ -61,7 +61,7 @@ Here is a simple example:
 ```json
 {
   "type": "root",
-  "description": "Listes de diffusion étudiants de l'Université de Rennes 1",
+  "description": "Listes de diffusion étudiants de l'Université de Rennes",
   "children": [
     {
       "type": "topic",
@@ -73,17 +73,17 @@ Here is a simple example:
           "children": [
             {
               "type": "list",
-              "email": "med-doctorat-2122@listes.etudiant.univ-rennes1.fr",
+              "email": "med-doctorat-2122@listes.etudiant.univ-rennes.fr",
               "description": "Faculté de médecine : tous les étudiants inscrits en Doctorat (inscrits 2021-2022) (19 membres)"
             },
             {
               "type": "list",
-              "email": "med-m10103-2122@listes.etudiant.univ-rennes1.fr",
+              "email": "med-m10103-2122@listes.etudiant.univ-rennes.fr",
               "description": "CERTIFICAT DE CAPACITE D'ORTHOPTISTE ANNEE2 (inscrits 2021-2022) (20 membres)"
             },
             {
               "type": "list",
-              "email": "med-m10104-2122@listes.etudiant.univ-rennes1.fr",
+              "email": "med-m10104-2122@listes.etudiant.univ-rennes.fr",
               "description": "CERTIFICAT DE CAPACITE D'ORTHOPTISTE ANNEE3 (inscrits 2021-2022) (18 membres)"
             }
           ]
@@ -92,7 +92,7 @@ Here is a simple example:
     },
     {
       "type": "topic",
-      "description": "Université de Rennes 1",
+      "description": "Université de Rennes",
       "children": [
         {
           "type": "topic",
@@ -100,7 +100,7 @@ Here is a simple example:
           "children": [
             {
               "type": "list",
-              "email": "ur1-etudiants@listes.etudiant.univ-rennes1.fr",
+              "email": "ur1-etudiants@listes.etudiant.univ-rennes.fr",
               "description": "Tous les étudiants inscrits à l'Université, année universitaire en cours (37751 membres)"
             }
           ]
@@ -113,7 +113,7 @@ Here is a simple example:
       "children": [
         {
           "type": "list",
-          "email": "t20301pastel@listes.etudiant.univ-rennes1.fr",
+          "email": "t20301pastel@listes.etudiant.univ-rennes.fr",
           "description": "Liste correspondant au parcours PASTEL de la LP Mécatronique (13 membres)"
         }
       ]
@@ -137,7 +137,7 @@ You can filter lists or topics, based on regular expressions using the `--exclud
 
 You might want to export a merged version of the JSON files, to publish mailing lists from multiple vhosts. Here is the JQ command to run to merge JSON files under a common root element:
 ```
-jq -s ' {type: "root", description: "Université de Rennes 1", children: .} | (.children[].type="topic") | (.children[].description |= sub("Université de Rennes 1 - ";""))|.' test_pers.json test_etu.json > test_all.json
+jq -s ' {type: "root", description: "Université de Rennes", children: .} | (.children[].type="topic") | (.children[].description |= sub("Université de Rennes - ";""))|.' test_pers.json test_etu.json > test_all.json
 ```
 
 ## Pushing JSON updates to Partage severs
@@ -148,5 +148,5 @@ You need first to install [the Python library for the Partage BSS API](https://g
 
 Then run the `CreateDefinition` method with the JSON file as argument:
 ```
-cd libPythonBssApi ; ./cli-bss.py --bssUrl=https://ppd-api.partage.renater.fr/service/domain --domain=univ-rennes1.fr --domainKey=SECRET --createDefinition --jsonData=/ur1_listes_all.json
+cd libPythonBssApi ; ./cli-bss.py --bssUrl=https://ppd-api.partage.renater.fr/service/domain --domain=univ-rennes.fr --domainKey=SECRET --createDefinition --jsonData=/ur1_listes_all.json
 ```

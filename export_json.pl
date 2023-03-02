@@ -161,7 +161,7 @@ foreach my $list (@{$all_lists || []}) {
         $reason = $result->{'reason'};
     }
     unless ($action =~ /do_it/) {
-        printf STDERR "INFO: list %s not exported (due to authorization scenario result)\n", $list->get_list_address() if ($main::options{'verbose'});
+        printf STDERR "INFO: list %s not exported (due to authorization scenario result '%s')\n", $list->get_list_address(), $action if ($main::options{'verbose'});
         next;
     }
        
